@@ -16,12 +16,13 @@ public class OLC1Practica1 {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        
+        System.out.println("inicio");
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Principal().setVisible(true);
+                new Inicio().setVisible(true);
             }
         });
+        System.out.println("final");
     }
     
 }
