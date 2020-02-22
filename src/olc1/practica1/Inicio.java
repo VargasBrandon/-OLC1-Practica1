@@ -109,24 +109,26 @@ public class Inicio extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnAnalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(30, 30, 30)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(156, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(btnAnalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnAnalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -152,7 +154,7 @@ public class Inicio extends javax.swing.JFrame {
     if(seleccionar.showDialog(null,"Abrir") == JFileChooser.APPROVE_OPTION){
             archivo = seleccionar.getSelectedFile();
             if(archivo.canRead()){
-                if(archivo.getName().endsWith("txt")){
+                if(archivo.getName().endsWith("(.er")){
                     String documento = AbrirArchivo(archivo);
                     txtArea.setText(documento);
                 }else{
@@ -181,7 +183,7 @@ public class Inicio extends javax.swing.JFrame {
     public void Guardar(){
         if(seleccionar.showDialog(null,"Guardar") == JFileChooser.APPROVE_OPTION){
             archivo = seleccionar.getSelectedFile();
-            if(archivo.getName().endsWith("txt")){
+            if(archivo.getName().endsWith("(.er")){
                 String Documento = txtArea.getText();
                 String mensaje = GuardarArchivo(archivo,Documento);
                 if (mensaje!=null) {
@@ -206,11 +208,19 @@ public class Inicio extends javax.swing.JFrame {
         }
         return mensaje;
     }
-    
+    public static boolean bandera;
     public void Analizar(){
         Lexico.AnalizadorLexico(txtArea.getText());
-        Reconocer.Definir(Lexico.Tokens);
-      //  System.out.println("\n finalizoooooo");
+        if(bandera==false){
+            Reconocer.Definir(Lexico.Tokens);
+        }else{
+            String c= "";
+            for (int i = 0; i < Lexico.Errores.size(); i++) {
+                c= Lexico.Errores.get(i).getCaracter();
+                int j = 1+i;
+               JOptionPane.showMessageDialog(null, "Se Econtraron errores \n los errores son :\n"+j+")"+c );
+            }
+        }       
     }
     
     

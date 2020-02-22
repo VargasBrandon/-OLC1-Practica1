@@ -16,25 +16,26 @@ public class Arbol {
     public String anulable;
     public String primero;
     public String ultimo;
-    public String hijo1;
-    public String hijo2;
+    public int padre;
+    public int hijo1;
+    public int hijo2;
     public String tipo;
+    public String estado;
+    public String siguientes;
 
-    public Arbol(String Expresion, String nombre, int identificador, String anulable, String primero, String ultimo, String tipo) {
+
+    public Arbol(String Expresion, String nombre, int identificador, String anulable, String primero, String ultimo, int padre, String tipo, String estado) {
         this.Expresion = Expresion;
         this.nombre = nombre;
         this.identificador = identificador;
         this.anulable = anulable;
         this.primero = primero;
         this.ultimo = ultimo;
+        this.padre = padre;
         this.tipo = tipo;
+        this.estado = estado;
     }
 
-    
-    
-    
-    
-    
     public String getExpresion() {
         return Expresion;
     }
@@ -43,8 +44,6 @@ public class Arbol {
         this.Expresion = Expresion;
     }
 
-    
-    
     public String getNombre() {
         return nombre;
     }
@@ -85,19 +84,27 @@ public class Arbol {
         this.ultimo = ultimo;
     }
 
-    public String getHijo1() {
+    public int getPadre() {
+        return padre;
+    }
+
+    public void setPadre(int padre) {
+        this.padre = padre;
+    }
+
+    public int getHijo1() {
         return hijo1;
     }
 
-    public void setHijo1(String hijo1) {
+    public void setHijo1(int hijo1) {
         this.hijo1 = hijo1;
     }
 
-    public String getHijo2() {
+    public int getHijo2() {
         return hijo2;
     }
 
-    public void setHijo2(String hijo2) {
+    public void setHijo2(int hijo2) {
         this.hijo2 = hijo2;
     }
 
@@ -109,6 +116,24 @@ public class Arbol {
         this.tipo = tipo;
     }
 
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getSiguientes() {
+        return siguientes;
+    }
+
+    public void setSiguientes(String siguientes) {
+        this.siguientes = siguientes;
+    }
+
+    
+    
     
     
     

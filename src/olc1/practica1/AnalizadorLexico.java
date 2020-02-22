@@ -72,6 +72,12 @@ public class AnalizadorLexico {
                         Columna += 1;
                         estadoPrincipal = 14; 
                     }
+                    else if(cadenaConcatenar == ' ' ||cadenaConcatenar == '\n' || cadenaConcatenar == '\t'|| 
+                            cadenaConcatenar == '\f'){
+                       
+                        Columna += 1;
+                        estadoPrincipal = 0; 
+                    }
                     else{
                         error += cadenaConcatenar;
                         Columna += 1;
@@ -96,7 +102,12 @@ public class AnalizadorLexico {
                         token = "";
                         estadoInicio -= 1;
                         estadoPrincipal = 0;
-                    }else{
+                    }else if(cadenaConcatenar == ' ' ||cadenaConcatenar == '\n' || cadenaConcatenar == '\t'){
+                       
+                        Columna += 1;
+                        estadoPrincipal = 2; 
+                    }
+                    else{
                         error += cadenaConcatenar;
                         Columna += 1;
                         TablaErrores(error,"simbolo desconocido");
@@ -115,7 +126,13 @@ public class AnalizadorLexico {
                         token = "";
                         estadoInicio -= 1;
                         estadoPrincipal = 0;
-                    }else{
+                    }else if(cadenaConcatenar == ' ' ||cadenaConcatenar == '\n' 
+                            || cadenaConcatenar == '\t'|| cadenaConcatenar == '\f'){
+                       
+                        Columna += 1;
+                        estadoPrincipal = 3; 
+                    }
+                    else{
                         error += cadenaConcatenar;
                         Columna += 1;
                         TablaErrores(error,"simbolo desconocido");
@@ -306,11 +323,11 @@ public class AnalizadorLexico {
    {
         Errores.add(new Error(ContToken,error,descripcion));
         ContError++;
-        /*
+        
         if (ContError > 1)
         {
-            anderaGrafica = true;
+            Inicio.bandera = true;
         }
-        */
-        }
+        
+    }
 }

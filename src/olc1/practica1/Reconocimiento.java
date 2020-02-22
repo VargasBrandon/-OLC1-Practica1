@@ -1,7 +1,13 @@
 
 package olc1.practica1;
 import java.util.ArrayList;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.swing.JFileChooser;
 
 public class Reconocimiento {
     public ArrayList<Conjunto> Conjuntos = new ArrayList<Conjunto>();
@@ -123,27 +129,37 @@ System.out.println("\n---Lista Lexemas---");
     String ExpresionRecorrer;
     String ExpresionActual;
     int ContExpresionActual;
+    int ContSimbolosExpresion;
     public void ArbolDeExpresion(){        
-      //  for (int i = 0; i < Expresiones.size() ; i++) {
-            ExpresionRecorrer = Expresiones.get(0).getExpresion();
-            ExpresionActual = Expresiones.get(0).getNombre();
+        for (int i = 0; i < Expresiones.size() ; i++) {
+            ExpresionRecorrer = Expresiones.get(i).getExpresion();
+            ExpresionActual = Expresiones.get(i).getNombre();
             System.out.println("expreision :"+ ExpresionRecorrer +"\n");
-        RecorrerExpresion(ExpresionRecorrer);
-   //     ContExpresionActual = 0;
-        
-  //      }
-        for (int j = 0; j < Arboles.size(); j++) {           
-            System.out.print(ContExpresionActual+")"+"->"+Arboles.get(j).getExpresion() + "->" + Arboles.get(j).getNombre()+"\n");
-        }
-        
+            RecorrerExpresion(ExpresionRecorrer);
+            IncioRecorrerArbol(Arboles);
+            Grafica();
+            GraficaSiguientes();
+            ContExpresionActual = 0;               
+          }
+       
+             System.out.println("\n");
+            for (int j = 0; j < Arboles.size(); j++) {           
+            System.out.print("---"+Arboles.get(j).getExpresion() + "->" +"nombre :" +" ( " + Arboles.get(j).getNombre()+") "
+                            +" nombre :"+ Arboles.get(j).getNombre()
+                            +" siguien :" + Arboles.get(j).getSiguientes()
+                            +"\n");
+        } 
+                            
     }   
-    
+    int contPadre = 1;
     public void RecorrerExpresion(String cadena){
+        ContSimbolosExpresion = 0;
         int estadoInicio = 0;
         int estadoPrincipal = 0;        
         char cadenaConcatenar;
         String expresion = "";
         int cont= 1;
+        
         for (estadoInicio = 0; estadoInicio < cadena.length(); estadoInicio++)
         {
             cadenaConcatenar = cadena.charAt(estadoInicio);            
@@ -156,6 +172,8 @@ System.out.println("\n---Lista Lexemas---");
                         estadoPrincipal = 3;
                     }
                     else if(cadenaConcatenar == '*' || cadenaConcatenar == '?' ){
+                        expresion += cadenaConcatenar;
+                        estadoInicio-=1;
                         estadoPrincipal = 4;
                     }else{
                         expresion += cadenaConcatenar;
@@ -164,16 +182,19 @@ System.out.println("\n---Lista Lexemas---");
                     }
                     break;
                 case 1:
-                    Arboles.add(new Arbol(ExpresionActual,expresion,0,"","0","0","simbolo"));
+                    Arboles.add(new Arbol(ExpresionActual,expresion,0,"","0","0",contPadre,"simbolo","falso"));
                     ContExpresionActual++;
+                    contPadre++ ;
+                    ContSimbolosExpresion++;
                     expresion = "";
                     estadoPrincipal = 0;
                     break;
                 case 2:
                     if(cadenaConcatenar == '"'){
-                        Arboles.add(new Arbol(ExpresionActual,expresion,cont,"N",String.valueOf(cont),String.valueOf(cont),"cadena"));
+                        Arboles.add(new Arbol(ExpresionActual,expresion,cont,"N",String.valueOf(cont),String.valueOf(cont),contPadre,"cadena","falso"));
                         cont++;
                         ContExpresionActual++;
+                        contPadre++;
                         expresion = "";
                         estadoPrincipal = 0;
                     }else{
@@ -183,9 +204,10 @@ System.out.println("\n---Lista Lexemas---");
                     break;
                 case 3:
                     if(cadenaConcatenar == '}'){
-                        Arboles.add(new Arbol(ExpresionActual,expresion,cont,"N",String.valueOf(cont),String.valueOf(cont),"cadena"));
+                        Arboles.add(new Arbol(ExpresionActual,expresion,cont,"N",String.valueOf(cont),String.valueOf(cont),contPadre,"cadena","falso"));
                         cont++;
                         ContExpresionActual++;
+                        contPadre++;
                         expresion = "";
                         estadoPrincipal = 0;
                     }else{
@@ -194,11 +216,14 @@ System.out.println("\n---Lista Lexemas---");
                     }
                     break;    
                 case 4:
-                    Arboles.add(new Arbol(ExpresionActual,expresion,0,"N","0","0","simbolo"));
+                    Arboles.add(new Arbol(ExpresionActual,expresion,0,"A","0","0",contPadre,"simbolo","falso"));
                     ContExpresionActual++;
+                    contPadre++ ;
+                    ContSimbolosExpresion++;
                     expresion = "";
                     estadoPrincipal = 0;
                     break;
+                    
             }
         }
     }
@@ -206,14 +231,261 @@ System.out.println("\n---Lista Lexemas---");
     int contArbol;
     String TemporalHoja;
     String TemporalExpresion;
-    public void IncioRecorrerArbol(){
-        if(contArbol<ContExpresionActual){
-            TemporalExpresion = Arboles.get(0).getExpresion();
-            if(TemporalExpresion == ExpresionActual){
-               // temporalHoja = 
+    int estadoArbol;
+    public void IncioRecorrerArbol(ArrayList<Arbol> token){
+        int estadoInicio;
+        int estadoPrincipal = 0;
+        int cantidadCadenas = 0;
+        int datosrecorridos = 0;
+        
+        for (estadoInicio =token.size()-ContExpresionActual; estadoInicio < token.size(); estadoInicio++) {
+            
+            String pArbol = token.get(estadoInicio).getNombre();
+            String tipoA = token.get(estadoInicio).getTipo();
+            String estadoA = token.get(estadoInicio).getEstado();
+            String verificar = pArbol.toLowerCase();           
+            switch (estadoPrincipal)
+            {
+                case 0:
+                    if(tipoA.equals("simbolo") && estadoA.equals("falso")){
+                        if(verificar.equals(".")){
+                            datosrecorridos=0;
+                            datosrecorridos++;                         
+                            estadoPrincipal = 1;
+                        }else if(verificar.equals("|")){
+                            datosrecorridos=0;
+                            datosrecorridos++;                           
+                            estadoPrincipal = 1;
+                        }else if(verificar.equals("*") || verificar.equals("+") || verificar.equals("?") ){
+                            datosrecorridos=0;
+                            datosrecorridos++;                           
+                            estadoPrincipal = 3;
+                        }else{
+                        
+                        }
+                    }else if(tipoA.equals("cadena") && estadoA.equals("falso")){
+                        if(cantidadCadenas >= 1){
+                         //   datosrecorridos++;
+                            estadoInicio--;
+                            estadoPrincipal =2;
+                        }else{
+                            System.out.println("no entro cadena mano");
+                        }                       
+                        
+                    }
+                    else{
+                        datosrecorridos++;
+                        estadoPrincipal=0;
+                    }
+                    break;
+                case 1:
+                    if(tipoA.equals("cadena")&& estadoA.equals("falso")){
+                        datosrecorridos++;
+                        cantidadCadenas++;
+                        estadoPrincipal =2;
+                    }else{
+                        estadoInicio--;
+                        estadoPrincipal = 0; 
+                    }                       
+                    break;
+                case 2:
+                    if(tipoA.equals("cadena")&& estadoA.equals("falso")){
+                        int datopadre = 0 ;
+                        datopadre = estadoInicio - datosrecorridos;
+                        int posH1= datopadre+1;
+                        int posH2= estadoInicio;
+                        token.get(datopadre).setHijo1(token.get(posH1).getPadre());
+                        token.get(datopadre).setHijo2(token.get(posH2).getPadre());
+                        token.get(datopadre).setTipo("cadena");                       
+                        token.get(estadoInicio).setEstado("verdadero");
+                        token.get(datopadre+1).setEstado("verdadero");
+                //ANULABLES        
+                        if(token.get(datopadre).getNombre().equals(".")){
+                            if(token.get(posH1).getAnulable().equals("A") && token.get(posH2).getAnulable().equals("A")){
+                                token.get(datopadre).setAnulable("A");
+                            }else{
+                                token.get(datopadre).setAnulable("N");
+                            }
+                        }else{
+                            if(token.get(posH1).getAnulable().equals("A") || token.get(posH2).getAnulable().equals("A")){
+                                token.get(datopadre).setAnulable("A");
+                            }else{
+                                token.get(datopadre).setAnulable("N");
+                            }
+                        }  
+                  //Primeros      
+                        if(token.get(datopadre).getNombre().equals(".")){
+                            if(token.get(posH1).getAnulable().equals("N")){
+                                token.get(datopadre).setPrimero(token.get(posH1).getPrimero());
+                            }else if(token.get(posH1).getAnulable().equals("A")){
+                                token.get(datopadre).setPrimero(token.get(posH1).getPrimero()+","+token.get(posH2).getPrimero());;
+                            }
+                        }else{
+                            token.get(datopadre).setPrimero(token.get(posH1).getPrimero()+","+token.get(posH2).getPrimero());
+                        } 
+                  //Ultimos     
+                        if(token.get(datopadre).getNombre().equals(".")){
+                            if(token.get(posH2).getAnulable().equals("N")){
+                                token.get(datopadre).setUltimo(token.get(posH2).getUltimo());
+                            }else if(token.get(posH2).getAnulable().equals("A")){
+                                token.get(datopadre).setUltimo(token.get(posH1).getUltimo()+","+token.get(posH2).getUltimo());
+                            }
+                        }else{
+                            token.get(datopadre).setUltimo(token.get(posH1).getUltimo()+","+token.get(posH2).getUltimo());
+                        }
+                    //dar siguientes  
+                        if(token.get(datopadre).getNombre().equals(".")){
+                            String strMain = token.get(posH1).ultimo;   
+                            String[] arrSplit = strMain.split(","); 
+                            for (int i = 0; i < arrSplit.length; i++) {
+                                for (int j =token.size()-ContExpresionActual; j < token.size(); j++) {
+                                    if(token.get(j).getIdentificador()==Integer.parseInt(arrSplit[i])){
+                                        token.get(j).setSiguientes(token.get(posH2).getPrimero());
+                                    }
+                                }
+                            }
+                        }
+                        
+                        cantidadCadenas = 0;
+                        estadoInicio = token.size()-ContExpresionActual -1;
+                        estadoPrincipal =0;                                             
+                    }else{
+                        estadoInicio--;
+                        estadoPrincipal = 0;                       
+                    } 
+                    break;
+                case 3:
+                   if(tipoA.equals("cadena")&& estadoA.equals("falso")){
+                        int datopadre = 0 ;
+                        datopadre = estadoInicio -1;
+                        int posH1= datopadre+1;
+                        token.get(datopadre).setHijo1(token.get(posH1).getPadre());
+                        token.get(datopadre).setTipo("cadena");                       
+                        token.get(datopadre+1).setEstado("verdadero");
+                        
+                 //ANULABLES       
+                        if(token.get(datopadre).getNombre().equals("+")){
+                            if(token.get(posH1).getAnulable().equals("N")){
+                                token.get(datopadre).setAnulable("N");
+                            }else{
+                                token.get(datopadre).setAnulable("A");
+                            }
+                        }
+                  //Primeros y Ultimos
+                        token.get(datopadre).setPrimero(token.get(posH1).getPrimero());
+                        token.get(datopadre).setUltimo(token.get(posH1).getUltimo());
+                        
+                        
+                  //siguientes      
+                        if(token.get(datopadre).getNombre().equals("*") || token.get(datopadre).getNombre().equals("+")){
+                            String strMain = token.get(posH1).ultimo;   
+                            String[] arrSplit = strMain.split(","); 
+                            for (int i = 0; i < arrSplit.length; i++) {
+                                for (int j =token.size()-ContExpresionActual; j < token.size(); j++) {
+                                    if(token.get(j).getIdentificador()==Integer.parseInt(arrSplit[i])){
+                                        token.get(j).setSiguientes(token.get(posH1).getPrimero());
+                                    }
+                                }
+                            }
+                        }
+                        
+                        
+                        cantidadCadenas = 0;
+                        estadoInicio = token.size()-ContExpresionActual -1;
+                        estadoPrincipal =0;                                             
+                    }else{
+                        estadoInicio--;
+                        estadoPrincipal = 0;                       
+                    } 
+                    break;
             }
-        }       
+        }
+   /*     System.out.println("\n");
+        System.out.println("\n contador acutal de datos ->" + (Arboles.size()-ContExpresionActual));
+        for (int j = Arboles.size()-ContExpresionActual; j < Arboles.size(); j++) {           
+            System.out.print(Arboles.get(j).getExpresion() + "->" +" nombre:" +" (" + Arboles.get(j).getNombre()+")" +"-"
+                            +" estado:"+ Arboles.get(j).getEstado()+"-"
+                            +" tipo:" + Arboles.get(j).getTipo() +"-"
+                            +" padre:"+ Arboles.get(j).getPadre()+"-"
+                            +" hijo1:"+ Arboles.get(j).getHijo1() +"-"
+                            +" hijo2:"+ Arboles.get(j).getHijo2()+"\n");
+        }  */
+        
     }
+    
+    
+    public void Grafica(){
+        FileWriter fichero =null;
+        PrintWriter archivo = null;
+        String nombre =ExpresionActual ;
+        String nombreDot = nombre + ".dot";
+        try{
+            fichero  = new FileWriter(nombreDot);
+            archivo = new PrintWriter(fichero);
+            archivo.println("digraph structs { \n node [shape=record]; \n");
+            for (int i = Arboles.size()-ContExpresionActual; i < Arboles.size(); i++) {
+                String anulable =  Arboles.get(i).getAnulable();
+                String identificadores = Arboles.get(i).getIdentificador()+"";
+                String primeros = Arboles.get(i).getPrimero();
+                String ultimos = Arboles.get(i).getUltimo();
+                String nombreA = Arboles.get(i).getNombre();
+                archivo.print(Arboles.get(i).getPadre()+"[label="+ "\"{"+anulable+"|{"+primeros+"|"+"<here>"+nombreA+"|"+ultimos+"}|"+identificadores+"}"+"\""+" ];\n");
+            }            
+            for (int i = Arboles.size()-ContExpresionActual; i < Arboles.size(); i++) {
+                if(Arboles.get(i).getHijo1()>0){
+                    archivo.print(Arboles.get(i).getPadre()+"->"+Arboles.get(i).getHijo1()+";\n");
+                }
+                if(Arboles.get(i).getHijo2()>0){
+                    archivo.print(Arboles.get(i).getPadre()+"->"+Arboles.get(i).getHijo2()+";\n");
+                } 
+            }           
+            archivo.print("\n}");
+            fichero.close();
+        }catch(Exception e){
+            System.out.println(e);
+        }       
+        try{
+            String cmd = "dot.exe -Tpng "+nombre+".dot -o" +nombre+".png";
+            Runtime.getRuntime().exec(cmd);
+        }catch(IOException ioe){
+            System.out.println(ioe);
+        }
+    }    
+    
+    public void GraficaSiguientes(){
+        FileWriter fichero =null;
+        PrintWriter archivo = null;
+        String nombre =ExpresionActual ;
+        String nombreDot = "siguientes"+nombre + ".dot";
+        try{
+            fichero  = new FileWriter(nombreDot);
+            archivo = new PrintWriter(fichero);
+            archivo.println("digraph structs {\n");
+            archivo.println(" graph [pad=\"0.5\", nodesep=\"0.5\", ranksep=\"2\"];\n");
+            archivo.println("node [shape=plain]; \n rankdir=LR;\n\n\n");
+            archivo.println("Foo [label=<\n" + "<table border=\"0\" cellborder=\"1\" cellspacing=\"0\">\n");
+            archivo.println("<tr><td><i>Enum</i></td><td><i>Etiqueta</i></td><td><i>siguientes</i></td></tr>\n");
+            for (int i = Arboles.size()-ContExpresionActual; i < Arboles.size(); i++) {
+                if(Arboles.get(i).getIdentificador()>0){
+                    archivo.println("<tr><td>"+Arboles.get(i).getIdentificador()+"</td><td>"+Arboles.get(i).getNombre()+"</td><td>"+Arboles.get(i).getSiguientes()+"</td></tr>");
+                }
+              
+            }               
+            archivo.print("</table>>];");
+            archivo.print("\n}");
+            fichero.close();
+        }catch(Exception e){
+            System.out.println(e);
+        }       
+        try{
+            String cmd = "dot.exe -Tpng "+"siguientes"+nombre+".dot -o"+"siguientes"+nombre+".png";
+            Runtime.getRuntime().exec(cmd);
+        }catch(IOException ioe){
+            System.out.println(ioe);
+        }
+    }  
+    
+    
     
     
     public void Punto(){
